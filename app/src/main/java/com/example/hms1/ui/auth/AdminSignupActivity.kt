@@ -4,8 +4,9 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.hms1.databinding.ActivityAdminSignupBinding
 import com.example.hms1.data.repository.AuthRepository
+import com.example.hms1.databinding.ActivityAdminSignupBinding
+import com.example.hms1.ui.admin.AdminDashboardActivity
 import kotlinx.coroutines.launch
 
 class AdminSignupActivity : AppCompatActivity() {
@@ -30,28 +31,37 @@ class AdminSignupActivity : AppCompatActivity() {
 
             if (name.isBlank() || email.isBlank() || password.isBlank() || 
                 block.isBlank() || secretKey.isBlank()) {
-                showError("Please fill all fields")
+                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             lifecycleScope.launch {
-                val result = authRepository.createAdmin(name, email, password, block, secretKey)
-                result.fold(
-                    onSuccess = {
-                        Toast.makeText(this@AdminSignupActivity, 
-                            "Admin account created successfully", 
-                            Toast.LENGTH_SHORT).show()
-                        finish()
-                    },
-                    onFailure = { exception ->
-                        showError(exception.message ?: "Failed to create admin account")
-                    }
-                )
+                try {
+                    val result = authRepository.createAdmin(
+                        name = name,
+                        email = email,
+                        password = password,
+                        block = block,
+                        secretKey = secretKey
+                    )
+
+                    result.fold(
+                        onSuccess = {
+                            Toast.makeText(this@AdminSignupActivity,
+                                "Admin registration successful", Toast.LENGTH_SHORT).show()
+                            startActivity(android.content.Intent(this@AdminSignupActivity, AdminDashboardActivity::class.java))
+                            finish()
+                        },
+                        onFailure = { error ->
+                            Toast.makeText(this@AdminSignupActivity,
+                                "Registration failed: ${error.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                } catch (e: Exception) {
+                    Toast.makeText(this@AdminSignupActivity,
+                        "Registration failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
             }
         }
-    }
-
-    private fun showError(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 } 

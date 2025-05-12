@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_students"
+        android:icon="@drawable/ic_people"
+        android:title="Students" />
+
+    <item
+        android:id="@+id/navigation_complaints"
+        android:icon="@drawable/ic_complaint"
+        android:title="Complaints" />
+
+    <item
+        android:id="@+id/navigation_cleaning"
+        android:icon="@drawable/ic_cleaning"
+        android:title="Cleaning" />
+</menu> 

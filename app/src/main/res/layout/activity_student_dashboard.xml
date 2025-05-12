@@ -1,82 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp"
-    android:background="@android:color/white">
+    android:layout_height="match_parent">
 
-    <!-- Title -->
-    <TextView
-        android:id="@+id/tvDashboardTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Student Dashboard"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="16dp" />
-
-    <!-- Complaint Type Dropdown -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/tilComplaintType"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Complaint Type"
-        android:layout_marginBottom="12dp">
+        android:layout_height="wrap_content">
 
-        <AutoCompleteTextView
-            android:id="@+id/spinnerComplaintType"
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="none"
-            android:hint="Select Complaint Type"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:title="Student Dashboard"
+            app:titleTextColor="@android:color/white"/>
 
-            />
-    </com.google.android.material.textfield.TextInputLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Complaint Description -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/tilComplaintDescription"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/nav_host_fragment"
+        android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Description"
-        android:layout_marginBottom="12dp">
+        android:layout_height="match_parent"
+        app:defaultNavHost="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:navGraph="@navigation/student_nav_graph"/>
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etComplaintDescription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minLines="3"
-            android:inputType="textMultiLine"
-            android:gravity="top" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- Submit Button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnSubmitComplaint"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Submit Complaint"
-        android:layout_marginBottom="16dp" />
-
-    <!-- Divider -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@android:color/darker_gray"
-        android:layout_marginBottom="8dp" />
-
-    <!-- Complaint List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvComplaints"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:paddingTop="8dp"
-        android:contentDescription="Complaint Type"
-        />
+        android:layout_height="match_parent"
+        android:padding="8dp"
+        android:clipToPadding="false"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
-</LinearLayout>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabNewComplaint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:contentDescription="New Complaint"
+        app:srcCompat="@android:drawable/ic_input_add"/>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:menu="@menu/student_bottom_nav_menu"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

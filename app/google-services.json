@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "339012919717",
+    "project_id": "tech-hms1",
+    "storage_bucket": "tech-hms1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:339012919717:android:03357458276de675fd084c",
+        "android_client_info": {
+          "package_name": "com.example.hms1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDqALGmjbB-9f6N7TmVcjHuFOQQwV67rw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

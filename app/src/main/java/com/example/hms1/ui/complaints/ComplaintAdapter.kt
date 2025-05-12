@@ -1,18 +1,21 @@
-package com.example.hms1.ui.adapters
+package com.example.hms1.ui.complaints
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.hms1.R
 import com.example.hms1.data.models.Complaint
 import com.example.hms1.data.models.ComplaintStatus
+import com.example.hms1.data.models.ComplaintType
 import com.example.hms1.databinding.ItemComplaintBinding
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class ComplaintAdapter : ListAdapter<Complaint, ComplaintAdapter.ComplaintViewHolder>(ComplaintDiffCallback()) {
+class ComplaintAdapter(
+    private val onItemClick: (Complaint) -> Unit
+) : ListAdapter<Complaint, ComplaintAdapter.ComplaintViewHolder>(ComplaintDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ComplaintViewHolder {
         val binding = ItemComplaintBinding.inflate(
@@ -27,36 +30,39 @@ class ComplaintAdapter : ListAdapter<Complaint, ComplaintAdapter.ComplaintViewHo
         holder.bind(getItem(position))
     }
 
-    class ComplaintViewHolder(
+    inner class ComplaintViewHolder(
         private val binding: ItemComplaintBinding
     ) : RecyclerView.ViewHolder(binding.root) {
-        private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+        private val dateFormat = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
+
+        init {
+            binding.root.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onItemClick(getItem(position))
+                }
+            }
+        }
 
         fun bind(complaint: Complaint) {
             binding.apply {
-                tvComplaintType.text = complaint.type.name
-                tvStatus.text = complaint.status.name
+                tvTitle.text = complaint.title
                 tvDescription.text = complaint.description
-                tvRoomNumber.text = "Room: ${complaint.roomNumber}"
-                tvDate.text = dateFormat.format(complaint.createdAt)
+                tvStatus.text = complaint.status.name
+                tvDate.text = complaint.createdAt?.let { dateFormat.format(it) }
+                tvType.text = complaint.type.name
+                tvRoomNumber.text = complaint.roomNumber
+                tvBlock.text = complaint.block
 
-                if (complaint.notes.isNullOrBlank()) {
-                    tvNotes.visibility = View.GONE
-                } else {
-                    tvNotes.visibility = View.VISIBLE
-                    tvNotes.text = complaint.notes
+                // Set status background color
+                val statusColor = when (complaint.status) {
+                    ComplaintStatus.PENDING -> R.color.status_pending
+                    ComplaintStatus.IN_PROGRESS -> R.color.status_in_progress
+                    ComplaintStatus.RESOLVED -> R.color.status_resolved
+                    ComplaintStatus.REJECTED -> R.color.status_rejected
                 }
-
-                // Set status color based on complaint status
-                tvStatus.setTextColor(
-                    when (complaint.status) {
-                        ComplaintStatus.PENDING -> android.graphics.Color.parseColor("#FFA500")
-                        ComplaintStatus.ASSIGNED -> android.graphics.Color.parseColor("#3498DB")
-                        ComplaintStatus.IN_PROGRESS -> android.graphics.Color.parseColor("#E67E22")
-                        ComplaintStatus.COMPLETED -> android.graphics.Color.parseColor("#2ECC71")
-                        ComplaintStatus.CANCELLED -> android.graphics.Color.parseColor("#E74C3C")
-                    }
-                )
+                tvStatus.setBackgroundResource(statusColor)
             }
         }
     }

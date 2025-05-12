@@ -1,86 +1,77 @@
 package com.example.hms1.ui.admin
 
 import android.os.Bundle
-import android.widget.Toast
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import com.example.hms1.data.models.User
-import com.example.hms1.data.models.UserType
-import com.example.hms1.data.repository.AuthRepository
+import androidx.fragment.app.Fragment
+import com.example.hms1.R
+import com.example.hms1.data.models.Complaint
+import com.example.hms1.data.models.ComplaintStatus
+import com.example.hms1.data.models.ComplaintType
 import com.example.hms1.databinding.ActivityAdminDashboardBinding
-import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
+import com.example.hms1.ui.complaints.ComplaintAdapter
+import com.google.android.material.navigation.NavigationBarView
 import java.util.Date
-import java.util.Locale
 
 class AdminDashboardActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAdminDashboardBinding
-    private val authRepository = AuthRepository()
-    private val dateFormat = SimpleDateFormat("ddMMMyy", Locale.getDefault())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAdminDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupAddStudentButton()
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.title = "Admin Dashboard"
+        
+        setupBottomNavigation()
+        // Start with complaints fragment
+        loadFragment(ComplaintsFragment())
     }
 
-    private fun setupAddStudentButton() {
-        binding.btnAddStudent.setOnClickListener {
-            val name = binding.etName.text.toString()
-            val regNo = binding.etRegNo.text.toString()
-            val roomNo = binding.etRoomNo.text.toString()
-            val dateOfBirth = binding.etDateOfBirth.text.toString()
-
-            if (name.isBlank() || regNo.isBlank() || roomNo.isBlank() || dateOfBirth.isBlank()) {
-                showError("Please fill all fields")
-                return@setOnClickListener
-            }
-
-            // Validate registration number format (24mx358)
-            if (!regNo.matches(Regex("^\\d{2}[a-zA-Z]{2}\\d{3}$"))) {
-                showError("Invalid registration number format. Use format: 24mx358")
-                return@setOnClickListener
-            }
-
-            // Validate date format (DDMMMYY)
-            try {
-                dateFormat.parse(dateOfBirth)
-            } catch (e: Exception) {
-                showError("Invalid date format. Use format: DDMMMYY (e.g., 02JAN03)")
-                return@setOnClickListener
-            }
-
-            lifecycleScope.launch {
-                val result = authRepository.createStudent(name, regNo, roomNo, dateOfBirth)
-                result.fold(
-                    onSuccess = {
-                        clearForm()
-                        showSuccess("Student added successfully")
-                    },
-                    onFailure = { exception ->
-                        showError(exception.message ?: "Failed to add student")
-                    }
-                )
+    private fun setupBottomNavigation() {
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_students -> {
+                    loadFragment(StudentsFragment())
+                    true
+                }
+                R.id.nav_complaints -> {
+                    loadFragment(ComplaintsFragment())
+                    true
+                }
+                R.id.nav_cleaning -> {
+                    loadFragment(CleaningFragment())
+                    true
+                }
+                else -> false
             }
         }
+
+        // Set default fragment
+        binding.bottomNavigation.selectedItemId = R.id.nav_complaints
     }
 
-    private fun clearForm() {
-        binding.apply {
-            etName.text?.clear()
-            etRegNo.text?.clear()
-            etRoomNo.text?.clear()
-            etDateOfBirth.text?.clear()
+    private fun loadFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, fragment)
+            .commit()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.admin_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_settings -> {
+                // For documentation, just show a toast
+                android.widget.Toast.makeText(this, "Settings clicked", android.widget.Toast.LENGTH_SHORT).show()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
-
-    private fun showError(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-    }
-
-    private fun showSuccess(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-    }
-} 
+}

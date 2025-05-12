@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_complaints"
+        android:icon="@android:drawable/ic_menu_help"
+        android:title="Complaints"/>
+    
+    <item
+        android:id="@+id/navigation_cleaning"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:title="Cleaning"/>
+    
+    <item
+        android:id="@+id/navigation_report"
+        android:icon="@android:drawable/ic_menu_report_image"
+        android:title="Report"/>
+</menu> 

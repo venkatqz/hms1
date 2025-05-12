@@ -1,121 +1,143 @@
 package com.example.hms1.ui.student
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
+import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.hms1.R
 import com.example.hms1.data.models.Complaint
 import com.example.hms1.data.models.ComplaintStatus
 import com.example.hms1.data.models.ComplaintType
 import com.example.hms1.data.models.User
+import com.example.hms1.data.repository.AuthRepository
+import com.example.hms1.data.repository.ComplaintRepository
 import com.example.hms1.databinding.ActivityStudentDashboardBinding
-import com.example.hms1.ui.adapters.ComplaintAdapter
+import com.example.hms1.databinding.DialogNewComplaintBinding
+import com.example.hms1.ui.complaints.ComplaintAdapter
 import kotlinx.coroutines.launch
-import java.util.Date
 
 class StudentDashboardActivity : AppCompatActivity() {
     private lateinit var binding: ActivityStudentDashboardBinding
-    private lateinit var currentUser: User
-    private val complaintAdapter = ComplaintAdapter()
+    private lateinit var layoutManager: LinearLayoutManager
+    private lateinit var currentUser: User.Student
+    private val complaintRepository = ComplaintRepository()
+    private lateinit var complaintAdapter: ComplaintAdapter
+    private lateinit var authRepository: AuthRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityStudentDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // TODO: Get current user from intent
-        setupComplaintForm()
-        setupComplaintsList()
-        loadComplaints()
+        setSupportActionBar(binding.toolbar)
+
+        val navController = findNavController(R.id.nav_host_fragment)
+        binding.bottomNavigation.setupWithNavController(navController)
+
+        authRepository = AuthRepository()
+        setupRecyclerView()
+        loadUserData()
+        setupFab()
     }
 
-    private fun setupComplaintForm() {
-        val complaintTypes = ComplaintType.values().map { it.name }
-        binding.spinnerComplaintType.setAdapter(
-            android.widget.ArrayAdapter(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                complaintTypes
-            )
-        )
-
-        binding.btnSubmitComplaint.setOnClickListener {
-            val description = binding.etComplaintDescription.text.toString()
-            val selectedType = binding.spinnerComplaintType.text.toString()
-
-            if (description.isBlank() || selectedType.isBlank()) {
-                showError("Please fill all fields")
-                return@setOnClickListener
+    private fun setupRecyclerView() {
+        layoutManager = LinearLayoutManager(this)
+        complaintAdapter = ComplaintAdapter(
+            onItemClick = { complaint ->
+                Toast.makeText(this, "Complaint clicked: ${complaint.title}", Toast.LENGTH_SHORT).show()
             }
-
-            val complaint = Complaint(
-                id = System.currentTimeMillis().toString(),
-                studentId = currentUser.id,
-                roomNumber = currentUser.roomNumber ?: "",
-                block = "A", // TODO: Get from user's room
-                type = ComplaintType.valueOf(selectedType),
-                description = description,
-                status = ComplaintStatus.PENDING,
-                createdAt = Date(),
-                updatedAt = Date()
-            )
-
-            // TODO: Save complaint to Firebase
-            clearForm()
-            showSuccess("Complaint submitted successfully")
-            loadComplaints() // Refresh the list
+        )
+        
+        binding.rvComplaints.apply {
+            this.layoutManager = this@StudentDashboardActivity.layoutManager
+            adapter = this@StudentDashboardActivity.complaintAdapter
         }
     }
 
-    private fun setupComplaintsList() {
-        binding.rvComplaints.apply {
-            layoutManager = LinearLayoutManager(this@StudentDashboardActivity)
-            adapter = complaintAdapter
+    private fun setupFab() {
+        binding.fabNewComplaint.setOnClickListener {
+            showNewComplaintDialog()
+        }
+    }
+
+    private fun loadUserData() {
+        lifecycleScope.launch {
+            try {
+                val currentUser = authRepository.getCurrentUser()
+                if (currentUser != null) {
+                    val userData = authRepository.getUserData(currentUser.uid)
+                    if (userData is User.Student) {
+                        this@StudentDashboardActivity.currentUser = userData
+                        supportActionBar?.title = "Welcome, ${userData.name}"
+                        loadComplaints()
+                    }
+                }
+            } catch (e: Exception) {
+                Toast.makeText(this@StudentDashboardActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
     private fun loadComplaints() {
-        // TODO: Load complaints from Firebase
-        // For now, using mock data
-        val mockComplaints = listOf(
-            Complaint(
-                id = "1",
-                studentId = "1",
-                roomNumber = "A-101",
-                block = "A",
-                type = ComplaintType.ELECTRICAL,
-                description = "Fan not working",
-                status = ComplaintStatus.PENDING,
-                createdAt = Date(),
-                updatedAt = Date()
-            ),
-            Complaint(
-                id = "2",
-                studentId = "1",
-                roomNumber = "A-101",
-                block = "A",
-                type = ComplaintType.PLUMBING,
-                description = "Water leakage in bathroom",
-                status = ComplaintStatus.IN_PROGRESS,
-                notes = "Plumber assigned and working on it",
-                createdAt = Date(),
-                updatedAt = Date()
-            )
-        )
-        complaintAdapter.submitList(mockComplaints)
+        lifecycleScope.launch {
+            try {
+                val result = complaintRepository.getComplaintsForStudent(currentUser.id)
+                result.onSuccess { complaints ->
+                    complaintAdapter.submitList(complaints)
+                }.onFailure { error ->
+                    Toast.makeText(this@StudentDashboardActivity, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(this@StudentDashboardActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
-    private fun clearForm() {
-        binding.etComplaintDescription.text?.clear()
-        binding.spinnerComplaintType.text?.clear()
-    }
+    private fun showNewComplaintDialog() {
+        val dialogBinding = DialogNewComplaintBinding.inflate(LayoutInflater.from(this))
+        
+        AlertDialog.Builder(this)
+            .setTitle("New Complaint")
+            .setView(dialogBinding.root)
+            .setPositiveButton("Submit") { _, _ ->
+                val title = dialogBinding.etTitle.text.toString()
+                val description = dialogBinding.etDescription.text.toString()
+                
+                if (title.isBlank() || description.isBlank()) {
+                    Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
 
-    private fun showError(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-    }
+                val complaint = Complaint(
+                    studentId = currentUser.id,
+                    title = title,
+                    description = description,
+                    status = ComplaintStatus.PENDING,
+                    roomNumber = currentUser.roomNumber,
+                    block = currentUser.block,
+                    type = ComplaintType.GENERAL
+                )
 
-    private fun showSuccess(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+                lifecycleScope.launch {
+                    try {
+                        complaintRepository.createComplaint(complaint)
+                        Toast.makeText(this@StudentDashboardActivity,
+                            "Complaint submitted successfully",
+                            Toast.LENGTH_SHORT).show()
+                        loadComplaints()
+                    } catch (e: Exception) {
+                        Toast.makeText(this@StudentDashboardActivity,
+                            "Failed to submit complaint: ${e.message}",
+                            Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
-} 
+}

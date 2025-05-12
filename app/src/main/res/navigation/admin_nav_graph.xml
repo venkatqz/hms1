@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/admin_nav_graph"
+    app:startDestination="@id/navigation_students">
+
+    <fragment
+        android:id="@+id/navigation_students"
+        android:name="com.example.hms1.ui.admin.StudentsFragment"
+        android:label="Students" />
+
+    <fragment
+        android:id="@+id/navigation_complaints"
+        android:name="com.example.hms1.ui.admin.ComplaintsFragment"
+        android:label="Complaints" />
+
+    <fragment
+        android:id="@+id/navigation_cleaning"
+        android:name="com.example.hms1.ui.admin.CleaningFragment"
+        android:label="Cleaning" />
+
+</navigation> 

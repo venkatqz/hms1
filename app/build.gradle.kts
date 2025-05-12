@@ -2,6 +2,8 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
+
+    id ("com.google.gms.google-services")
 }
 
 android {
@@ -48,6 +50,9 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     
+    // Google Sign-In
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+    
     // Room
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
@@ -61,6 +66,9 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
+
+    implementation ("com.google.firebase:firebase-auth:22.3.1")  // Ensure this is the correct version
+    implementation ("com.google.firebase:firebase-firestore:24.0.1' // If using Firestore")
     
     // Lifecycle
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")

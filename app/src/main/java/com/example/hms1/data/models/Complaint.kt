@@ -1,38 +1,38 @@
 package com.example.hms1.data.models
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import com.google.firebase.firestore.DocumentId
+import com.google.firebase.firestore.ServerTimestamp
 import java.util.Date
 
-enum class ComplaintType {
-    ELECTRICAL,
-    PLUMBING,
-    CARPENTER,
-    CIVIL,
-    CLEANING,
-    OTHER
-}
+data class Complaint(
+    @DocumentId
+    val id: String = "",
+    val studentId: String = "",
+    val title: String = "",
+    val description: String = "",
+    val status: ComplaintStatus = ComplaintStatus.PENDING,
+    val roomNumber: String = "",
+    val block: String = "",
+    val type: ComplaintType = ComplaintType.GENERAL,
+    val assignedWorkerId: String? = null,
+    val notes: String? = null,
+    @ServerTimestamp
+    val createdAt: Date = Date(),
+    @ServerTimestamp
+    val updatedAt: Date = Date()
+)
 
 enum class ComplaintStatus {
     PENDING,
-    ASSIGNED,
     IN_PROGRESS,
-    COMPLETED,
-    CANCELLED
+    RESOLVED,
+    REJECTED
 }
 
-@Entity(tableName = "complaints")
-data class Complaint(
-    @PrimaryKey
-    val id: String,
-    val studentId: String,
-    val roomNumber: String,
-    val block: String,
-    val type: ComplaintType,
-    val description: String,
-    val status: ComplaintStatus,
-    val assignedWorkerId: String? = null,
-    val notes: String? = null,
-    val createdAt: Date,
-    val updatedAt: Date
-) 
+enum class ComplaintType {
+    GENERAL,
+    MAINTENANCE,
+    CLEANING,
+    SECURITY,
+    OTHER
+} 
