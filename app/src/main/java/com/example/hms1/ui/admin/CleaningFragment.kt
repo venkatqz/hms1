@@ -7,8 +7,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.hms1.data.models.CleaningTask
+import com.example.hms1.data.models.CleaningStatus
 import com.example.hms1.databinding.FragmentCleaningBinding
 import com.example.hms1.ui.cleaning.CleaningAdapter
+import java.util.Date
 
 class CleaningFragment : Fragment() {
     private var _binding: FragmentCleaningBinding? = null
@@ -37,12 +39,35 @@ class CleaningFragment : Fragment() {
             },
             onStatusClick = { task ->
                 // Handle status update click
+                updateTaskStatus(task)
             }
         )
 
-        binding.rvCleaning.apply {
+        binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = cleaningAdapter
+        }
+    }
+
+    private fun updateTaskStatus(task: CleaningTask) {
+        val newStatus = when (task.status) {
+            CleaningStatus.PENDING -> CleaningStatus.IN_PROGRESS
+            CleaningStatus.IN_PROGRESS -> CleaningStatus.COMPLETED
+            CleaningStatus.COMPLETED -> CleaningStatus.PENDING
+        }
+        
+        // Update the task in the adapter
+        val updatedTask = task.copy(
+            status = newStatus,
+            updatedAt = Date()
+        )
+        
+        // Update the list
+        val currentList = cleaningAdapter.currentList.toMutableList()
+        val index = currentList.indexOfFirst { it.id == task.id }
+        if (index != -1) {
+            currentList[index] = updatedTask
+            cleaningAdapter.submitList(currentList)
         }
     }
 
@@ -52,28 +77,28 @@ class CleaningFragment : Fragment() {
                 id = "1",
                 block = "Block A",
                 floor = "1st Floor",
-                status = "PENDING",
-                assignedWorkerId = null,
-                createdAt = null,
-                updatedAt = null
+                status = CleaningStatus.PENDING,
+                assignedWorker = "",
+                createdAt = Date(),
+                updatedAt = Date()
             ),
             CleaningTask(
                 id = "2",
                 block = "Block A",
                 floor = "2nd Floor",
-                status = "IN_PROGRESS",
-                assignedWorkerId = "worker1",
-                createdAt = null,
-                updatedAt = null
+                status = CleaningStatus.IN_PROGRESS,
+                assignedWorker = "worker1",
+                createdAt = Date(),
+                updatedAt = Date()
             ),
             CleaningTask(
                 id = "3",
                 block = "Block B",
                 floor = "1st Floor",
-                status = "COMPLETED",
-                assignedWorkerId = "worker2",
-                createdAt = null,
-                updatedAt = null
+                status = CleaningStatus.COMPLETED,
+                assignedWorker = "worker2",
+                createdAt = Date(),
+                updatedAt = Date()
             )
         )
         cleaningAdapter.submitList(dummyTasks)

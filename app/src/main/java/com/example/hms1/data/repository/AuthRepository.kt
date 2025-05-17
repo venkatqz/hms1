@@ -74,24 +74,34 @@ class AuthRepository {
         block: String,
         secretKey: String
     ): Result<User.Admin> {
-        if (!verifyAdminCredentials(secretKey)) {
-            return Result.failure(Exception("Invalid secret key"))
-        }
-
-        try {
+        return try {
+            // First create the Firebase Auth user
             val authResult = auth.createUserWithEmailAndPassword(email, password).await()
             val userId = authResult.user?.uid ?: return Result.failure(Exception("Authentication failed"))
 
+            // Create the admin document with the secret key
             val admin = User.Admin(
                 id = userId,
                 name = name,
                 email = email,
                 roomNumber = "",
-                block = block
+                block = block,
+                secretKey = secretKey
             )
 
-            db.collection("admins").document(userId).set(admin).await()
-            return Result.success(admin)
+            try {
+                // Try to create the admin document
+                db.collection("admins").document(userId).set(admin).await()
+                return Result.success(admin)
+            } catch (e: Exception) {
+                // If document creation fails, delete the auth user
+                try {
+                    auth.currentUser?.delete()?.await()
+                } catch (deleteError: Exception) {
+                    Log.e("AuthRepository", "Failed to delete auth user after document creation failed", deleteError)
+                }
+                return Result.failure(Exception("Failed to create admin: ${e.message}"))
+            }
         } catch (e: Exception) {
             return Result.failure(Exception("Failed to create admin: ${e.message}"))
         }

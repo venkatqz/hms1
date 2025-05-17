@@ -49,8 +49,8 @@ class CleaningAdapter(
             binding.apply {
                 tvBlock.text = task.block
                 tvFloor.text = task.floor
-                tvStatus.text = task.status
-                tvWorker.text = task.assignedWorkerId ?: "Not Assigned"
+                tvStatus.text = task.status.name
+                tvWorker.text = if (task.assignedWorker.isNotEmpty()) task.assignedWorker else "Not Assigned"
             }
         }
     }

@@ -27,12 +27,4 @@ enum class ComplaintStatus {
     IN_PROGRESS,
     RESOLVED,
     REJECTED
-}
-
-enum class ComplaintType {
-    GENERAL,
-    MAINTENANCE,
-    CLEANING,
-    SECURITY,
-    OTHER
 } 

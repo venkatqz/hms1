@@ -31,10 +31,6 @@ class WorkerDashboardActivity : AppCompatActivity() {
             onItemClick = { complaint ->
                 // Handle complaint item click
                 Toast.makeText(this, "Complaint clicked: ${complaint.title}", Toast.LENGTH_SHORT).show()
-            },
-            onStatusClick = { complaint ->
-                // Handle status update click
-                Toast.makeText(this, "Update status for: ${complaint.title}", Toast.LENGTH_SHORT).show()
             }
         )
 

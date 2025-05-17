@@ -31,7 +31,7 @@ class StudentsFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        adapter = StudentAdapter { student ->
+        adapter = StudentAdapter { _ ->
             // Handle student item click
         }
         binding.recyclerView.apply {

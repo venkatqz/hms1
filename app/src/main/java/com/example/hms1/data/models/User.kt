@@ -57,6 +57,7 @@ sealed class User {
         override val email: String = "",
         override val roomNumber: String = "",
         override val block: String = "",
+        val secretKey: String = "",
         @ServerTimestamp
         override val createdAt: Date = Date()
     ) : User() {
